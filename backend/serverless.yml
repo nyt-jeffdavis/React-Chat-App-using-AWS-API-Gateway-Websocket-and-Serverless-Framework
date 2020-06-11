@@ -2,10 +2,10 @@ service: serverless-chat
 
 provider:
   name: aws
-  runtime: nodejs8.10
+  runtime: nodejs10.x
   stackName: ${self:service}-${self:provider.stage}
   stage: ${opt:stage, 'dev'}
-  region: ${opt:region, 'ap-southeast-2'}
+  region: ${opt:region, 'us-east-1'}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -39,7 +39,9 @@ functions:
     events:
       - websocket:
           route: $connect
-          authorizer: authorizerFunc # references the authorizerFunc function below
+          authorizer:
+            name: "authorizerFunc"
+            identitySource: ["route.request.querystring.token"]
       - websocket:
           route: $disconnect
   authorizerFunc:

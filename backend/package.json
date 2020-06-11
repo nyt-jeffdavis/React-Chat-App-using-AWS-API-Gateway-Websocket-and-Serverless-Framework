@@ -5,10 +5,10 @@
   "main": "handler.js",
   "dependencies": {
     "aws-sdk": "^2.382.0",
-    "bluebird": "^3.5.3",
-    "serverless-websockets-plugin": "^1.0.0",
+    "bluebird": "^3.7.2",
     "node-fetch": "^2.3.0",
-    "node-jose": "^1.1.0"
+    "node-jose": "^1.1.0",
+    "serverless-websockets-plugin": "^1.0.0"
   },
   "devDependencies": {
     "eslint": "^5.15.1"

@@ -43,7 +43,7 @@ module.exports.defaultMessage = (event, context, callback) => {
   callback(null);
 };
 
-module.exports.sendMessage = async (event, context, callback) => {
+module.exports.sendMessage = async(event, context, callback) => {
   let connectionData;
   try {
     connectionData = await DDB.scan({
@@ -54,7 +54,7 @@ module.exports.sendMessage = async (event, context, callback) => {
     console.log(err);
     return { statusCode: 500 };
   }
-  const postCalls = connectionData.Items.map(async ({ connectionId }) => {
+  const postCalls = connectionData.Items.map(async({ connectionId }) => {
     try {
       return await send(event, connectionId.S);
     } catch (err) {
@@ -108,15 +108,15 @@ const deleteConnection = connectionId => {
   return DDB.deleteItem(deleteParams).promise();
 };
 
-module.exports.authorizerFunc = async (event, context, callback) => {
+module.exports.authorizerFunc = async(event, context, callback) => {
   const keys_url =
-    "https://cognito-idp.ap-southeast-2.amazonaws.com/USER_POOL_ID/.well-known/jwks.json";
+    "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_SCcIw4iH6/.well-known/jwks.json";
   const {
     queryStringParameters: { token },
     methodArn
   } = event;
 
-  const app_client_id = APP_CLIENT_ID;
+  const app_client_id = "2f0o578jjsm9kv39r8kqd55de6";
   if (!token) return context.fail("Unauthorized");
   const sections = token.split(".");
   let authHeader = jose.util.base64url.decode(sections[0]);
@@ -141,28 +141,28 @@ module.exports.authorizerFunc = async (event, context, callback) => {
       context.fail("Public key not found in jwks.json");
     }
 
-    jose.JWK.asKey(foundKey).then(function(result) {
-      // verify the signature
-      jose.JWS.createVerify(result)
-        .verify(token)
-        .then(function(result) {
-          // now we can use the claims
-          const claims = JSON.parse(result.payload);
-          // additionally we can verify the token expiration
-          const current_ts = Math.floor(new Date() / 1000);
-          if (current_ts > claims.exp) {
-            context.fail("Token is expired");
-          }
-          // and the Audience (use claims.client_id if verifying an access token)
-          if (claims.aud != app_client_id) {
-            context.fail("Token was not issued for this audience");
-          }
-          context.succeed(generateAllow("me", methodArn));
-        })
-        .catch(err => {
-          context.fail("Signature verification failed");
-        });
-    });
+    return jose.JWK.asKey(foundKey)
+      .then(function(result) {
+        // verify the signature
+        return jose.JWS.createVerify(result).verify(token)
+          .then(function(result) {
+            // now we can use the claims
+            const claims = JSON.parse(result.payload);
+            // additionally we can verify the token expiration
+            const current_ts = Math.floor(new Date() / 1000);
+            if (current_ts > claims.exp) {
+              context.fail("Token is expired");
+            }
+            // and the Audience (use claims.client_id if verifying an access token)
+            if (claims.aud != app_client_id) {
+              context.fail("Token was not issued for this audience");
+            }
+            return generateAllow(claims.sub, methodArn);
+          })
+          .catch(err => {
+            context.fail("Signature verification failed");
+          });
+      });
   }
 };
 
