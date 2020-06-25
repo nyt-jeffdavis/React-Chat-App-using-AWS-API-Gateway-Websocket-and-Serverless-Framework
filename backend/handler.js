@@ -56,7 +56,10 @@ module.exports.sendMessage = async(event, context, callback) => {
   }
   const postCalls = connectionData.Items.map(async({ connectionId }) => {
     try {
-      return await send(event, connectionId.S);
+      for (let i = 0; i < 10; i++) {
+        console.log("Sending: " + i)
+        await send(event, connectionId.S);
+      }
     } catch (err) {
       if (err.statusCode === 410) {
         return await deleteConnection(connectionId.S);

@@ -45,6 +45,10 @@ const ChatWindow = props => {
       action: "sendMessage",
       data: JSON.stringify(newMessage)
     });
+    ws.json({
+      action: "sendMessage",
+      data: JSON.stringify(newMessage)
+    });
   };
 
   const onMessageReceied = ({ data }) => {
